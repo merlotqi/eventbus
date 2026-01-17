@@ -16,11 +16,11 @@ jobs:
         build_type: [Debug, Release]
         include:
           - compiler: gcc
-            cxx_compiler: g++-11
-            c_compiler: gcc-11
+            cxx_compiler: g++-12
+            c_compiler: gcc-12
           - compiler: clang
-            cxx_compiler: clang++-14
-            c_compiler: clang-14
+            cxx_compiler: clang++-16
+            c_compiler: clang-16
 
     steps:
     - name: Checkout code
@@ -39,6 +39,7 @@ jobs:
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
           -DCMAKE_CXX_COMPILER=${{ matrix.cxx_compiler }} \
           -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} \
+          -DCMAKE_CXX_STANDARD=20 \
           -DEVENTBUS_BUILD_EXAMPLES=ON \
           -G Ninja
 
@@ -114,6 +115,7 @@ jobs:
           -DCMAKE_BUILD_TYPE=Debug \
           -DCMAKE_CXX_COMPILER=clang++-14 \
           -DCMAKE_C_COMPILER=clang-14 \
+          -DCMAKE_CXX_STANDARD=20 \
           -DEVENTBUS_BUILD_EXAMPLES=ON \
           -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
           -G Ninja
@@ -156,6 +158,7 @@ jobs:
         cd build
         cmake .. \
           -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_CXX_STANDARD=20 \
           -DEVENTBUS_BUILD_EXAMPLES=OFF \
           -G Ninja
 
@@ -167,6 +170,7 @@ jobs:
         cd build
         cmake .. \
           -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_CXX_STANDARD=20 \
           -DEVENTBUS_BUILD_EXAMPLES=OFF \
           -G Ninja
 
