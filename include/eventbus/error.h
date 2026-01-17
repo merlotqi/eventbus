@@ -1,3 +1,16 @@
+/**
+ * @file error.h
+ * @brief Error handling system for EventBus operations
+ *
+ * This file provides a comprehensive error handling system using std::error_code
+ * and std::error_category. It defines error codes for various failure conditions
+ * that can occur during EventBus operations, along with human-readable error
+ * messages.
+ *
+ * The error system integrates seamlessly with C++ standard library error handling
+ * and can be used with exceptions or error codes as preferred.
+ */
+
 #pragma once
 
 #include <string>
@@ -6,24 +19,68 @@
 
 namespace eventbus {
 
+/**
+ * @brief Error codes for EventBus operations
+ *
+ * Defines all possible error conditions that can occur during EventBus
+ * operations. These codes are used with std::error_code for type-safe
+ * error handling.
+ */
 enum class ErrorCode {
+  /** Operation completed successfully */
   Success = 0,
+
+  /** Event queue is full and cannot accept more events */
   QueueFull,
+
+  /** Event queue is closed and not accepting new events */
   QueueClosed,
+
+  /** EventBus is shutting down and not accepting new operations */
   BusShutdown,
+
+  /** Subscription is invalid or corrupted */
   InvalidSubscription,
+
+  /** Subscription has expired or been cancelled */
   SubscriptionExpired,
+
+  /** Error occurred in the dispatcher */
   DispatcherError,
+
+  /** Error occurred during event handler execution */
   HandlerError,
+
+  /** Event type is not supported by this EventBus */
   InvalidEventType,
+
+  /** Operation timed out */
   Timeout,
+
+  /** Unknown or unexpected error */
   UnknownError
 };
 
+/**
+ * @brief Error category implementation for EventBus errors
+ *
+ * Provides human-readable error messages for EventBus error codes.
+ * Implements the std::error_category interface to integrate with
+ * standard C++ error handling facilities.
+ */
 class ErrorCategory : public std::error_category {
  public:
+  /**
+   * @brief Get the name of this error category
+   * @return "eventbus"
+   */
   const char *name() const noexcept override { return "eventbus"; }
 
+  /**
+   * @brief Get human-readable error message for an error code
+   * @param ev The error code value
+   * @return Human-readable error message
+   */
   std::string message(int ev) const override {
     using namespace std::string_view_literals;
 

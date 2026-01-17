@@ -18,16 +18,14 @@
 
 #pragma once
 
-#include <algorithm>
 #include <iostream>
 #include <memory>
+#include <type_traits>
 #include <typeindex>
 #include <unordered_map>
-#include <vector>
+#include <utility>
 
-#include "context.h"
 #include "dispatcher.h"
-#include "error.h"
 #include "event.h"
 #include "policy.h"
 #include "queue.h"
@@ -36,18 +34,18 @@
 namespace eventbus {
 
 template <typename Handler, typename EventType>
-struct is_event_handler {
+struct IsEventHandler {
   template <typename H, typename E>
   static auto test(int) -> decltype(std::declval<H>()(std::declval<E>()), std::true_type{});
 
   template <typename, typename>
   static std::false_type test(...);
 
-  static constexpr bool value = decltype(test<Handler, EventType>(0))::value;
+  static constexpr bool VALUE = decltype(test<Handler, EventType>(0))::value;
 };
 
 template <typename Handler, typename EventType>
-inline constexpr bool is_event_handler_v = is_event_handler<Handler, EventType>::value;
+inline constexpr bool IS_EVENT_HANDLER_V = IsEventHandler<Handler, EventType>::VALUE;
 
 /**
  * @brief Main EventBus class providing flexible event publishing and subscription
@@ -96,7 +94,7 @@ class EventBus {
    * - Asynchronous policy: Creates SingleThreadDispatcher (background thread)
    */
   EventBus()
-      : dispatcher_(create_dispatcher()),
+      : dispatcher_(createDispatcher()),
         queue_(std::make_unique<EventQueue<EventVariant, QueuePolicy, BackpressurePolicy>>()),
         next_id_(0),
         shutdown_(false) {}
@@ -116,7 +114,7 @@ class EventBus {
         shutdown_(false) {}
 
  private:
-  static std::unique_ptr<Dispatcher> create_dispatcher() {
+  static std::unique_ptr<Dispatcher> createDispatcher() {
     if constexpr (std::is_same_v<ExecutionPolicy, Synchronous>) {
       return std::make_unique<SynchronousDispatcher>();
     } else {
@@ -154,7 +152,7 @@ class EventBus {
    * // subscription automatically unsubscribes when it goes out of scope
    * @endcode
    */
-  template <typename EventType, typename Handler, typename = std::enable_if_t<is_event_handler_v<Handler, EventType>>>
+  template <typename EventType, typename Handler, typename = std::enable_if_t<IS_EVENT_HANDLER_V<Handler, EventType>>>
   [[nodiscard]] Subscription subscribe(Handler &&handler) {
     if (shutdown_.load()) {
       return Subscription();
@@ -278,7 +276,6 @@ class EventBus {
   [[nodiscard]] bool active() const noexcept { return !shutdown_.load(); }
 
  private:
-
   friend class Subscription;
 
   struct HandlerWrapperBase {

@@ -50,7 +50,6 @@ Checks: >
 
 WarningsAsErrors: ''
 HeaderFilterRegex: '.*'
-AnalyzeTemporaryDtors: false
 FormatStyle: file
 User: eventbus
 CheckOptions:
@@ -67,13 +66,13 @@ CheckOptions:
   - key: readability-identifier-naming.NamespaceCase
     value: lower_case
   - key: readability-identifier-naming.ClassMemberCase
-    value: camelBack
-  - key: readability-identifier-naming.PrivateMemberPrefix
-    value: ""
-  - key: readability-identifier-naming.ProtectedMemberPrefix
-    value: ""
-  - key: readability-identifier-naming.PublicMemberPrefix
-    value: ""
+    value: lower_case
+  - key: readability-identifier-naming.PrivateMemberSuffix
+    value: "_"
+  - key: readability-identifier-naming.ProtectedMemberSuffix
+    value: "_"
+  - key: readability-identifier-naming.PublicMemberSuffix
+    value: "_"
   - key: readability-identifier-naming.EnumConstantCase
     value: UPPER_CASE
   - key: readability-identifier-naming.GlobalConstantCase
