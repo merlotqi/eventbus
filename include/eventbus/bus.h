@@ -34,18 +34,18 @@
 namespace eventbus {
 
 template <typename Handler, typename EventType>
-struct IsEventHandler {
+struct is_event_handler {
   template <typename H, typename E>
   static auto test(int) -> decltype(std::declval<H>()(std::declval<E>()), std::true_type{});
 
   template <typename, typename>
   static std::false_type test(...);
 
-  static constexpr bool VALUE = decltype(test<Handler, EventType>(0))::value;
+  static constexpr bool value = decltype(test<Handler, EventType>(0))::value;
 };
 
 template <typename Handler, typename EventType>
-inline constexpr bool IS_EVENT_HANDLER_V = IsEventHandler<Handler, EventType>::VALUE;
+inline constexpr bool is_event_handler_v = is_event_handler<Handler, EventType>::value;
 
 /**
  * @brief Main EventBus class providing flexible event publishing and subscription
@@ -152,7 +152,7 @@ class EventBus {
    * // subscription automatically unsubscribes when it goes out of scope
    * @endcode
    */
-  template <typename EventType, typename Handler, typename = std::enable_if_t<IS_EVENT_HANDLER_V<Handler, EventType>>>
+  template <typename EventType, typename Handler, typename = std::enable_if_t<is_event_handler_v<Handler, EventType>>>
   [[nodiscard]] Subscription subscribe(Handler &&handler) {
     if (shutdown_.load()) {
       return Subscription();

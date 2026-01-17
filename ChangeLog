@@ -1,0 +1,24 @@
+Date: 2026-01-18
+Commit: 4716db9
+Author: Merlot.Qi <merlotrain.mc@gmail.com>
+Message: chore: add GPL-3 license file
+
+Date: 2026-01-17
+Commit: 78fc73c
+Author: Merlot.Qi <merlotrain.mc@gmail.com>
+Message: docs: add Doxygen documentation and update tooling config
+
+Date: 2026-01-17
+Commit: 588f349
+Author: Merlot.Qi <merlotrain.mc@gmail.com>
+Message: build(ci): upgrade compilers to gcc-12, clang-16 and enforce C++20
+
+Date: 2026-01-17
+Commit: 851d713
+Author: Merlot.Qi <merlotrain.mc@gmail.com>
+Message: Update ci.yml
+
+Date: 2026-01-17
+Commit: 5949d98
+Author: Merlot.Qi <merlotrain.mc@gmail.com>
+Message: Init eventbus.
