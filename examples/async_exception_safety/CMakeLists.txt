@@ -1,0 +1,3 @@
+add_executable(async_exception_safety main.cpp)
+
+target_link_libraries(async_exception_safety eventbus)

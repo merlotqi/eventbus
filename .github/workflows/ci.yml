@@ -1,0 +1,176 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        compiler: [gcc, clang]
+        build_type: [Debug, Release]
+        include:
+          - compiler: gcc
+            cxx_compiler: g++-11
+            c_compiler: gcc-11
+          - compiler: clang
+            cxx_compiler: clang++-14
+            c_compiler: clang-14
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cmake ninja-build
+
+    - name: Configure build
+      run: |
+        mkdir build
+        cd build
+        cmake .. \
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+          -DCMAKE_CXX_COMPILER=${{ matrix.cxx_compiler }} \
+          -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} \
+          -DEVENTBUS_BUILD_EXAMPLES=ON \
+          -G Ninja
+
+    - name: Build library
+      run: |
+        cd build
+        ninja
+
+    - name: Run examples (smoke test)
+      run: |
+        cd build
+        # Run a few key examples to ensure they work
+        ./examples/basic_sync/basic_sync
+        ./examples/async_exception_safety/async_exception_safety
+
+    - name: Build examples target
+      run: |
+        cd build
+        ninja build_all_examples
+
+    - name: Test installation
+      run: |
+        cd build
+        sudo ninja install
+        # Verify installation
+        ls -la /usr/local/include/eventbus/
+        ls -la /usr/local/lib/cmake/eventbus/
+
+    - name: Generate documentation
+      run: |
+        cd build
+        ninja docs
+        # Verify documentation was generated
+        ls -la docs/html/index.html
+
+  format-check:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install clang-format
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y clang-format-14
+
+    - name: Check code formatting
+      run: |
+        find include examples -name "*.h" -o -name "*.cpp" | xargs clang-format-14 --dry-run --Werror --style=file
+        if [ $? -ne 0 ]; then
+          echo "Code formatting check failed. Please run clang-format on the changed files."
+          exit 1
+        fi
+
+  static-analysis:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install clang-tidy
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y clang-tidy-14 cmake ninja-build
+
+    - name: Configure build for clang-tidy
+      run: |
+        mkdir build
+        cd build
+        cmake .. \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DCMAKE_CXX_COMPILER=clang++-14 \
+          -DCMAKE_C_COMPILER=clang-14 \
+          -DEVENTBUS_BUILD_EXAMPLES=ON \
+          -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+          -G Ninja
+
+    - name: Run clang-tidy
+      run: |
+        cd build
+        # Run clang-tidy on header files
+        find ../include -name "*.h" | xargs clang-tidy-14 --config-file=../.clang-tidy
+        # Run clang-tidy on example source files
+        find ../examples -name "*.cpp" | head -5 | xargs clang-tidy-14 --config-file=../.clang-tidy
+
+  build-other-platforms:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install dependencies (macOS)
+      if: runner.os == 'macOS'
+      run: |
+        brew install cmake ninja
+
+    - name: Install dependencies (Windows)
+      if: runner.os == 'Windows'
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: MINGW64
+        install: mingw-w64-x86_64-cmake mingw-w64-x86_64-ninja mingw-w64-x86_64-gcc
+
+    - name: Configure build (macOS)
+      if: runner.os == 'macOS'
+      run: |
+        mkdir build
+        cd build
+        cmake .. \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DEVENTBUS_BUILD_EXAMPLES=OFF \
+          -G Ninja
+
+    - name: Configure build (Windows)
+      if: runner.os == 'Windows'
+      shell: msys2 {0}
+      run: |
+        mkdir build
+        cd build
+        cmake .. \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DEVENTBUS_BUILD_EXAMPLES=OFF \
+          -G Ninja
+
+    - name: Build library
+      run: |
+        cd build
+        ninja

@@ -1,0 +1,19 @@
+# Build directories for Meson and CMake
+build/
+_build/
+meson-logs/
+CMakeCache.txt
+CMakeFiles/
+CMakeLists.txt.user
+CMakeLists.txt.state
+cmake_install.cmake
+Makefile
+*.cmake
+*.mk
+.vscode/
+.idea/
+.cache
+.DS_Store
+.vs
+build
+.cache
