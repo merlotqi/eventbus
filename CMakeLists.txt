@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 option(EVENTBUS_BUILD_EXAMPLES "Build EventBus examples" OFF)
+option(EVENTBUS_BUILD_DOCS "Build EventBus documentation with Doxygen" OFF)
 
 add_library(eventbus INTERFACE)
 
@@ -53,34 +54,36 @@ install(FILES
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/eventbus
 )
 
-# Doxygen documentation
-find_package(Doxygen OPTIONAL_COMPONENTS dot)
-if(Doxygen_FOUND)
-    set(DOXYGEN_PROJECT_NAME "EventBus")
-    set(DOXYGEN_PROJECT_VERSION ${PROJECT_VERSION})
-    set(DOXYGEN_PROJECT_DESCRIPTION "A modern C++20 event bus library")
-    set(DOXYGEN_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/docs)
-    set(DOXYGEN_GENERATE_HTML YES)
-    set(DOXYGEN_GENERATE_LATEX NO)
-    set(DOXYGEN_GENERATE_MAN NO)
-    set(DOXYGEN_GENERATE_XML NO)
-    set(DOXYGEN_WARN_AS_ERROR YES)
-    set(DOXYGEN_EXTRACT_ALL YES)
-    set(DOXYGEN_EXTRACT_PRIVATE NO)
-    set(DOXYGEN_EXTRACT_STATIC NO)
-    set(DOXYGEN_RECURSIVE YES)
-    set(DOXYGEN_QUIET YES)
+if(EVENTBUS_BUILD_DOCS)
+    # Doxygen documentation
+    find_package(Doxygen OPTIONAL_COMPONENTS dot)
+    if(Doxygen_FOUND)
+        set(DOXYGEN_PROJECT_NAME "EventBus")
+        set(DOXYGEN_PROJECT_VERSION ${PROJECT_VERSION})
+        set(DOXYGEN_PROJECT_DESCRIPTION "A modern C++20 event bus library")
+        set(DOXYGEN_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/docs)
+        set(DOXYGEN_GENERATE_HTML YES)
+        set(DOXYGEN_GENERATE_LATEX NO)
+        set(DOXYGEN_GENERATE_MAN NO)
+        set(DOXYGEN_GENERATE_XML NO)
+        set(DOXYGEN_WARN_AS_ERROR YES)
+        set(DOXYGEN_EXTRACT_ALL YES)
+        set(DOXYGEN_EXTRACT_PRIVATE NO)
+        set(DOXYGEN_EXTRACT_STATIC NO)
+        set(DOXYGEN_RECURSIVE YES)
+        set(DOXYGEN_QUIET YES)
 
-    doxygen_add_docs(eventbus_docs
-        ${CMAKE_CURRENT_SOURCE_DIR}/include
-        COMMENT "Generate HTML documentation"
-    )
+        doxygen_add_docs(eventbus_docs
+            ${CMAKE_CURRENT_SOURCE_DIR}/include
+            COMMENT "Generate HTML documentation"
+        )
 
-    # Custom target to build docs
-    add_custom_target(docs
-        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target eventbus_docs
-        COMMENT "Building documentation with Doxygen"
-    )
+        # Custom target to build docs
+        add_custom_target(docs
+            COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target eventbus_docs
+            COMMENT "Building documentation with Doxygen"
+        )
+    endif()
 endif()
 
 if(EVENTBUS_BUILD_EXAMPLES)
