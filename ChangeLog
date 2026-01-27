@@ -1,5 +1,15 @@
+Date: 2026-01-27
+Commit: 25aa475
+Author: Merlot.Qi <merlotrain.mc@gmail.com>
+Message: feat: add manual unsubscribe example demonstrating dynamic subscription management
+
+Date: 2026-01-19
+Commit: d5bdb98
+Author: Merlot.Qi <merlotrain.mc@gmail.com>
+Message: build: make Doxygen documentation build conditional on EVENTBUS_BUILD_DOCS option
+
 Date: 2026-01-18
-Commit: 4716db9
+Commit: 4ca843e
 Author: Merlot.Qi <merlotrain.mc@gmail.com>
 Message: chore: add GPL-3 license file
 

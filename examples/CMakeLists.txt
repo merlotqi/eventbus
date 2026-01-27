@@ -4,6 +4,7 @@ add_subdirectory(singleton_pattern)
 add_subdirectory(pointer_ownership)
 add_subdirectory(multi_publisher_single_subscriber)
 add_subdirectory(sync_multi_subscribers)
+add_subdirectory(manual_unsubscribe)
 
 add_custom_target(build_all_examples
     DEPENDS
@@ -13,5 +14,6 @@ add_custom_target(build_all_examples
         pointer_ownership
         multi_publisher_single_subscriber
         sync_multi_subscribers
+        manual_unsubscribe
     COMMENT "Building all EventBus examples"
 )

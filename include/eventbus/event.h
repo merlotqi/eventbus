@@ -22,8 +22,9 @@
 namespace eventbus {
 
 template <typename T>
-struct is_event_payload : std::conjunction<std::is_destructible<T>, std::negation<std::is_abstract<T>>,
-                                           std::negation<std::is_reference<T>>> {};
+struct is_event_payload : std::conjunction<std::is_destructible<T>, std::is_move_constructible<T>,
+                                           std::negation<std::is_abstract<T>>, std::negation<std::is_reference<T>>,
+                                           std::negation<std::is_array<T>>, std::negation<std::is_void<T>>> {};
 
 template <typename T>
 inline constexpr bool is_event_payload_v = is_event_payload<T>::value;
@@ -57,6 +58,9 @@ inline constexpr bool is_event_payload_v = is_event_payload<T>::value;
  */
 template <typename... Ts>
 class Event {
+  static_assert((is_event_payload_v<Ts> && ...),
+                "All event types must be destructible, non-abstract, and non-reference.");
+
  public:
   using Variant = std::variant<std::monostate, Ts...>;
 

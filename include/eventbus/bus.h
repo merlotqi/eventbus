@@ -164,8 +164,9 @@ class EventBus {
 
     auto wrapper = std::make_shared<HandlerWrapper<EventType, Handler>>(std::forward<Handler>(handler));
     handlers_[type_index][id] = wrapper;
+    subscription_map_.insert({id, type_index});
 
-    return Subscription([this, id]() { unsubscribe(id); });
+    return Subscription([this, id]() { unsubscribe_internal(id); });
   }
 
   /**
@@ -275,6 +276,44 @@ class EventBus {
    */
   [[nodiscard]] bool active() const noexcept { return !shutdown_.load(); }
 
+  /**
+   * @brief Manually unsubscribe a handler by subscription ID
+   *
+   * Allows manual unsubscription of an event handler. This is useful when
+   * a subscriber's state changes and it no longer needs to receive events.
+   * The subscription ID is returned by the subscribe() method.
+   *
+   * @param subscription_id The ID of the subscription to unsubscribe
+   * @return true if the subscription was found and removed, false otherwise
+   *
+   * @note This method is thread-safe and can be called from any thread
+   * @note If the subscription ID is invalid or already unsubscribed, this is a no-op
+   *
+   * Example:
+   * @code
+   * auto subscription_id = bus.subscribe<UserLoggedIn>(handler);
+   * // ... later, when no longer needed
+   * bus.unsubscribe(subscription_id);
+   * @endcode
+   */
+  [[nodiscard]] bool unsubscribe(size_t subscription_id) {
+    std::scoped_lock lock(handlers_mutex_);
+    auto it = subscription_map_.find(subscription_id);
+    if (it != subscription_map_.end()) {
+      auto type_index = it->second;
+      auto handler_it = handlers_.find(type_index);
+      if (handler_it != handlers_.end()) {
+        handler_it->second.erase(subscription_id);
+        if (handler_it->second.empty()) {
+          handlers_.erase(handler_it);
+        }
+      }
+      subscription_map_.erase(it);
+      return true;
+    }
+    return false;
+  }
+
  private:
   friend class Subscription;
 
@@ -299,12 +338,18 @@ class EventBus {
     }
   };
 
-  void unsubscribe(size_t id) {
+  void unsubscribe_internal(size_t id) {
     std::scoped_lock lock(handlers_mutex_);
     auto it = subscription_map_.find(id);
     if (it != subscription_map_.end()) {
       auto type_index = it->second;
-      handlers_[type_index].erase(id);
+      auto handler_it = handlers_.find(type_index);
+      if (handler_it != handlers_.end()) {
+        handler_it->second.erase(id);
+        if (handler_it->second.empty()) {
+          handlers_.erase(handler_it);
+        }
+      }
       subscription_map_.erase(it);
     }
   }
